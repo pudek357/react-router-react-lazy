@@ -1,7 +1,38 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import type { ComponentProps, ReactNode } from "react";
+import {
+  NavLink as BaseNavLink,
+  Outlet,
+  useLocation,
+  useNavigation,
+} from "react-router-dom";
+
+const NavLink = ({
+  to,
+  children,
+}: ComponentProps<typeof BaseNavLink> & { children: ReactNode }) => (
+  <BaseNavLink
+    to={to}
+    className="nav-link"
+    end={to === "/react-router-react-lazy/"}
+    unstable_viewTransition
+  >
+    {({ isActive, isPending, isTransitioning }) => (
+      <>
+        <span className="nav-link-route">{children}</span>
+
+        <span className="nav-link-state">
+          {isActive && <span className="nav-link-state-item">A</span>}
+          {isPending && <span className="nav-link-state-item">P</span>}
+          {isTransitioning && <span className="nav-link-state-item">T</span>}
+        </span>
+      </>
+    )}
+  </BaseNavLink>
+);
 
 export const RootLayout = () => {
   const { pathname } = useLocation();
+  const navigation = useNavigation();
 
   return (
     <div className="container">
@@ -10,13 +41,13 @@ export const RootLayout = () => {
       <div className="main-content">
         <div className="sidebar">
           <div>
-            <Link to="/react-router-react-lazy/">root</Link>
+            <NavLink to="/react-router-react-lazy/">root</NavLink>
           </div>
           <div>
-            <Link to="/react-router-react-lazy/foo">foo</Link>
+            <NavLink to="/react-router-react-lazy/foo">foo</NavLink>
           </div>
           <div>
-            <Link to="/react-router-react-lazy/bar">bar</Link>
+            <NavLink to="/react-router-react-lazy/bar">bar</NavLink>
           </div>
         </div>
 
@@ -25,7 +56,11 @@ export const RootLayout = () => {
             <h2>Content</h2>
 
             <div>
-              <Outlet />
+              {navigation.state === "loading" ? (
+                <div>Loading...</div>
+              ) : (
+                <Outlet />
+              )}
             </div>
           </div>
         </div>
